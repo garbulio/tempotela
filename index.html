@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metas da Nicole ⭐</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #FFF8F0; --bg2: #FFF0E0; --card: #FFFFFF;
+  --text: #2C1A0E; --text2: #8B6A50;
+  --accent: #FF6B35; --accent2: #FFB347;
+  --green: #4CAF50; --purple: #7F77DD;
+  --border: rgba(44,26,14,0.12); --radius: 16px;
+}
+body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+.screen { display: none; padding: 16px; max-width: 480px; margin: 0 auto; min-height: 100vh; }
+.screen.active { display: block; }
+
+/* HOME */
+.home-header { text-align: center; padding: 40px 0 28px; }
+.home-emoji { font-size: 72px; display: block; margin-bottom: 8px; }
+.home-title { font-size: 30px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+.home-sub { font-size: 14px; color: var(--text2); margin-top: 6px; }
+.home-btns { display: flex; flex-direction: column; gap: 14px; margin-top: 20px; }
+.home-btn { border: none; border-radius: var(--radius); padding: 20px 24px; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: transform 0.15s; font-family: 'Nunito', sans-serif; }
+.home-btn:active { transform: scale(0.97); }
+.home-btn.nicole { background: linear-gradient(135deg, #FF6B35, #FF8C5A); color: white; box-shadow: 0 4px 20px rgba(255,107,53,0.35); }
+.home-btn.pais { background: linear-gradient(135deg, #7F77DD, #9F97F0); color: white; box-shadow: 0 4px 20px rgba(127,119,221,0.35); }
+.home-btn.painel { background: linear-gradient(135deg, #4CAF50, #66BB6A); color: white; box-shadow: 0 4px 20px rgba(76,175,80,0.35); }
+.home-btn .btn-icon { font-size: 30px; }
+.home-btn .btn-text { text-align: left; }
+.home-btn .btn-text small { display: block; font-size: 12px; font-weight: 400; opacity: 0.85; margin-top: 2px; }
+
+/* LAYOUT */
+.top-bar { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-top: 8px; }
+.back-btn { background: var(--card); border: 0.5px solid var(--border); border-radius: 10px; padding: 8px 14px; font-size: 14px; cursor: pointer; color: var(--text2); font-weight: 700; font-family: 'Nunito', sans-serif; }
+.top-bar h2 { font-size: 20px; font-weight: 800; flex: 1; }
+.section-title { font-size: 12px; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.8px; margin: 20px 0 10px; }
+
+/* SETTINGS */
+.setting-row { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--card); border-radius: 12px; border: 0.5px solid var(--border); margin-bottom: 10px; cursor: pointer; transition: background 0.15s; }
+.setting-row:hover { background: var(--bg2); }
+.setting-row .sr-left { display: flex; align-items: center; gap: 12px; font-size: 15px; font-weight: 600; }
+.setting-row .sr-icon { font-size: 22px; }
+.setting-row .sr-arrow { color: var(--text2); font-size: 16px; font-weight: 700; }
+
+/* MODALS */
+.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal { background: var(--card); border-radius: 20px; padding: 24px; width: 100%; max-width: 380px; max-height: 90vh; overflow-y: auto; }
+.modal h3 { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
+.modal input, .modal select { width: 100%; border: 0.5px solid var(--border); border-radius: 10px; padding: 12px; font-size: 15px; background: var(--bg); color: var(--text); margin-bottom: 12px; outline: none; font-family: 'Nunito', sans-serif; }
+.modal input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255,107,53,0.15); }
+.modal-btns { display: flex; gap: 10px; margin-top: 8px; }
+.btn-primary { flex: 1; background: var(--accent); color: white; border: none; border-radius: 10px; padding: 13px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Nunito', sans-serif; }
+.btn-secondary { flex: 1; background: var(--bg2); color: var(--text); border: none; border-radius: 10px; padding: 13px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'Nunito', sans-serif; }
+.error-msg { color: #E24B4A; font-size: 13px; margin-bottom: 10px; display: none; }
+.success-msg { color: var(--green); font-size: 13px; margin-bottom: 10px; display: none; }
+
+/* PIN */
+.pin-dots { display: flex; justify-content: center; gap: 14px; margin: 16px 0; }
+.pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--accent); background: transparent; transition: background 0.2s; }
+.pin-dot.filled { background: var(--accent); }
+.pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 8px; }
+.pin-key { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 12px; padding: 16px; font-size: 22px; font-weight: 700; cursor: pointer; text-align: center; transition: background 0.1s; font-family: 'Nunito', sans-serif; }
+.pin-key:active { background: var(--accent); color: white; }
+
+/* META CARDS (Nicole) */
+.meta-card { background: var(--card); border-radius: var(--radius); border: 0.5px solid var(--border); padding: 16px 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: transform 0.15s; position: relative; overflow: hidden; }
+.meta-card:active { transform: scale(0.98); }
+.meta-card.done { opacity: 0.7; }
+.meta-card.done .meta-name { text-decoration: line-through; color: var(--text2); }
+.meta-emoji-big { font-size: 38px; flex-shrink: 0; }
+.meta-info { flex: 1; }
+.meta-name { font-size: 16px; font-weight: 700; }
+.meta-status { font-size: 12px; color: var(--text2); margin-top: 3px; }
+.meta-check { font-size: 26px; }
+
+/* NICOLE HEADER */
+.nicole-header { text-align: center; padding: 10px 0 20px; }
+.nicole-greeting { font-size: 24px; font-weight: 800; color: var(--accent); }
+.nicole-date { font-size: 13px; color: var(--text2); margin-top: 4px; }
+.progress-bar-wrap { background: var(--bg2); border-radius: 20px; height: 12px; margin: 14px 0 6px; overflow: hidden; }
+.progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 20px; transition: width 0.5s; }
+.progress-label { font-size: 13px; color: var(--text2); text-align: right; }
+
+/* PAINEL */
+.painel-hero { background: linear-gradient(135deg, #FF6B35, #FFB347); border-radius: 20px; padding: 28px 24px; margin-bottom: 20px; color: white; text-align: center; }
+.painel-hero .total-time { font-size: 52px; font-weight: 800; line-height: 1; }
+.painel-hero .total-label { font-size: 13px; opacity: 0.85; margin-top: 6px; }
+.painel-hero .countdown { font-size: 13px; background: rgba(255,255,255,0.2); border-radius: 20px; padding: 6px 16px; display: inline-block; margin-top: 12px; }
+.time-breakdown { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 18px; }
+.time-block { background: var(--card); border-radius: 14px; border: 0.5px solid var(--border); padding: 16px; text-align: center; }
+.time-block .tb-val { font-size: 22px; font-weight: 800; color: var(--accent); }
+.time-block .tb-label { font-size: 12px; color: var(--text2); margin-top: 3px; }
+.trophy-row { display: flex; gap: 4px; justify-content: center; margin-top: 8px; flex-wrap: wrap; min-height: 24px; }
+.trophy-icon { font-size: 18px; }
+
+/* TABELA */
+.tabela-wrap { overflow-x: auto; border-radius: 12px; border: 0.5px solid var(--border); }
+.tabela { width: 100%; border-collapse: collapse; font-size: 13px; background: var(--card); }
+.tabela th { padding: 10px 6px; color: var(--text2); font-weight: 700; text-align: center; border-bottom: 0.5px solid var(--border); background: var(--bg2); }
+.tabela th.meta-col { text-align: left; padding-left: 12px; }
+.tabela td { padding: 10px 6px; text-align: center; border-bottom: 0.5px solid var(--border); }
+.tabela td.meta-col { text-align: left; font-weight: 600; font-size: 12px; padding-left: 12px; max-width: 110px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tabela tr:last-child td { border-bottom: none; }
+
+/* META LIST (Pais) */
+.meta-list-item { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--card); border-radius: 12px; border: 0.5px solid var(--border); margin-bottom: 8px; }
+.meta-list-item .mli-emoji { font-size: 24px; }
+.meta-list-item .mli-name { flex: 1; font-size: 14px; font-weight: 700; }
+.mli-btn { background: var(--bg2); border: none; border-radius: 8px; padding: 7px 10px; font-size: 14px; cursor: pointer; }
+
+/* PICKERS */
+.emoji-picker { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+.ep-btn { font-size: 24px; background: var(--bg2); border: 2px solid transparent; border-radius: 8px; padding: 4px 8px; cursor: pointer; transition: border-color 0.15s; }
+.ep-btn.selected { border-color: var(--accent); background: #FFF0E0; }
+.color-picker-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 14px; }
+.cp-btn { width: 34px; height: 34px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: transform 0.15s; }
+.cp-btn.selected { border-color: #2C1A0E; transform: scale(1.2); }
+
+/* CONFETTI */
+.confetti-wrap { display: none; position: fixed; inset: 0; z-index: 200; pointer-events: none; align-items: center; justify-content: center; flex-direction: column; }
+.confetti-wrap.show { display: flex; }
+.confetti-msg { font-size: 26px; font-weight: 800; color: var(--accent); text-align: center; background: white; border-radius: 20px; padding: 24px 36px; box-shadow: 0 8px 40px rgba(255,107,53,0.3); animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+.confetti-msg .cf-emoji { font-size: 52px; display: block; margin-bottom: 10px; }
+@keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.confetti-particle { position: absolute; width: 8px; height: 8px; border-radius: 2px; animation: fall 1.8s ease-in forwards; }
+@keyframes fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
+
+/* TABS */
+.tab-btns { display: flex; gap: 8px; margin-bottom: 18px; }
+.tab-btn { flex: 1; padding: 11px; border: 0.5px solid var(--border); border-radius: 10px; background: var(--card); font-size: 14px; font-weight: 700; cursor: pointer; color: var(--text2); transition: all 0.15s; font-family: 'Nunito', sans-serif; }
+.tab-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+/* HISTÓRICO */
+.hist-semana { background: var(--card); border-radius: var(--radius); border: 0.5px solid var(--border); padding: 16px; margin-bottom: 14px; }
+.hist-semana h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--accent); }
+.hist-semana .hist-total { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+
+/* LOADING */
+.loading { text-align: center; padding: 40px 20px; color: var(--text2); font-size: 15px; }
+.spinner { font-size: 36px; display: block; margin-bottom: 12px; animation: spin 1s linear infinite; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+@media (max-width: 400px) {
+  .painel-hero .total-time { font-size: 40px; }
+  .tabela { font-size: 11px; }
+  .home-title { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="screen-home" class="screen active">
+  <div class="home-header">
+    <span class="home-emoji">⭐</span>
+    <div class="home-title">Metas da Nicole</div>
+    <div class="home-sub">Cumpra suas metas e ganhe tempo de tela!</div>
+  </div>
+  <div class="home-btns">
+    <button class="home-btn nicole" onclick="goNicole()">
+      <span class="btn-icon">🌟</span>
+      <div class="btn-text">Nicole<small>Ver e cumprir minhas metas</small></div>
+    </button>
+    <button class="home-btn pais" onclick="openPinModal()">
+      <span class="btn-icon">🔒</span>
+      <div class="btn-text">Papai & Mamãe<small>Configurações e metas</small></div>
+    </button>
+    <button class="home-btn painel" onclick="goPainel()">
+      <span class="btn-icon">📊</span>
+      <div class="btn-text">Painel<small>Ver progresso semanal</small></div>
+    </button>
+  </div>
+</div>
+
+<!-- NICOLE -->
+<div id="screen-nicole" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="goHome()">← Voltar</button>
+    <h2>🌟 Nicole</h2>
+  </div>
+  <div class="nicole-header">
+    <div class="nicole-greeting">Olá, Nicole! 👋</div>
+    <div class="nicole-date" id="nicole-date"></div>
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar" style="width:0%"></div></div>
+    <div class="progress-label" id="progress-label">0 de 0 metas</div>
+  </div>
+  <div id="nicole-metas"><div class="loading"><span class="spinner">⏳</span>Carregando metas...</div></div>
+</div>
+
+<!-- PAIS -->
+<div id="screen-pais" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="goHome()">← Voltar</button>
+    <h2>🔒 Papai & Mamãe</h2>
+  </div>
+  <div class="section-title">Configurações</div>
+  <div class="setting-row" onclick="openModal('modal-senha')">
+    <div class="sr-left"><span class="sr-icon">🔑</span> Alterar Senha</div>
+    <span class="sr-arrow">›</span>
+  </div>
+  <div class="setting-row" onclick="openModal('modal-tempo')">
+    <div class="sr-left"><span class="sr-icon">⏰</span> Tempo de tela diário</div>
+    <span class="sr-arrow" id="tempo-atual-label">›</span>
+  </div>
+  <div class="section-title">Metas</div>
+  <div class="setting-row" onclick="abrirNovaMeta()">
+    <div class="sr-left"><span class="sr-icon">➕</span> Criar nova meta</div>
+    <span class="sr-arrow">›</span>
+  </div>
+  <div id="lista-metas-pais"><div class="loading"><span class="spinner">⏳</span>Carregando...</div></div>
+</div>
+
+<!-- PAINEL -->
+<div id="screen-painel" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="goHome()">← Voltar</button>
+    <h2>📊 Painel</h2>
+  </div>
+  <div class="tab-btns">
+    <button class="tab-btn active" onclick="showTab('semana')">Esta semana</button>
+    <button class="tab-btn" onclick="showTab('historico')">Histórico</button>
+  </div>
+  <div id="tab-semana">
+    <div class="painel-hero">
+      <div style="font-size:36px;margin-bottom:6px">⏱️</div>
+      <div class="total-time" id="painel-total">0h 00min</div>
+      <div class="total-label">Tempo total conquistado para a próxima semana</div>
+      <div class="countdown" id="painel-countdown">⏳ calculando...</div>
+    </div>
+    <div class="time-breakdown">
+      <div class="time-block">
+        <div class="tb-val" id="painel-metas-time">0h 00min</div>
+        <div class="tb-label">⭐ Tempo por metas</div>
+      </div>
+      <div class="time-block">
+        <div class="tb-val" id="painel-bonus-time">0 min</div>
+        <div class="tb-label">🏆 Tempo bônus</div>
+        <div class="trophy-row" id="trophy-row"></div>
+      </div>
+    </div>
+    <div class="section-title">Metas desta semana</div>
+    <div class="tabela-wrap">
+      <table class="tabela">
+        <thead><tr>
+          <th class="meta-col">Meta</th>
+          <th>S</th><th>T</th><th>Q</th><th>Q</th><th>S</th><th>S</th><th>D</th>
+        </tr></thead>
+        <tbody id="tabela-body"><tr><td colspan="8" class="loading">Carregando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="tab-historico" style="display:none">
+    <div id="historico-content"><div class="loading"><span class="spinner">⏳</span>Carregando histórico...</div></div>
+  </div>
+</div>
+
+<!-- MODAL PIN -->
+<div id="modal-pin" class="modal-overlay">
+  <div class="modal">
+    <h3>🔒 Digite a senha</h3>
+    <div class="pin-dots" id="pin-dots"></div>
+    <div id="pin-error" class="error-msg">Senha incorreta. Tente novamente.</div>
+    <div class="pin-pad" id="pin-pad"></div>
+  </div>
+</div>
+
+<!-- MODAL SENHA -->
+<div id="modal-senha" class="modal-overlay">
+  <div class="modal">
+    <h3>🔑 Alterar Senha</h3>
+    <input type="password" id="nova-senha" placeholder="Nova senha" maxlength="8">
+    <input type="password" id="conf-senha" placeholder="Confirmar nova senha" maxlength="8">
+    <div id="senha-error" class="error-msg">As senhas não coincidem.</div>
+    <div id="senha-success" class="success-msg">Senha alterada com sucesso!</div>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeModal('modal-senha')">Cancelar</button>
+      <button class="btn-primary" onclick="salvarSenha()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL TEMPO -->
+<div id="modal-tempo" class="modal-overlay">
+  <div class="modal">
+    <h3>⏰ Tempo de tela diário</h3>
+    <select id="tempo-select">
+      <option value="30">30 minutos</option>
+      <option value="45">45 minutos</option>
+      <option value="60">1 hora</option>
+      <option value="90">1h 30min</option>
+      <option value="120">2 horas</option>
+      <option value="150">2h 30min</option>
+      <option value="180">3 horas</option>
+    </select>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeModal('modal-tempo')">Cancelar</button>
+      <button class="btn-primary" onclick="salvarTempo()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOVA/EDITAR META -->
+<div id="modal-nova-meta" class="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-meta-title">➕ Nova Meta</h3>
+    <input type="text" id="meta-nome" placeholder="Nome da meta (ex: Arrumar o quarto)" maxlength="40">
+    <div style="font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:700">Escolha um emoji:</div>
+    <div class="emoji-picker" id="emoji-picker"></div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:8px;font-weight:700">Escolha uma cor:</div>
+    <div class="color-picker-row" id="color-picker"></div>
+    <div id="meta-error" class="error-msg">Preencha o nome da meta.</div>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeModal('modal-nova-meta')">Cancelar</button>
+      <button class="btn-primary" onclick="salvarMeta()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRM -->
+<div id="modal-confirm" class="modal-overlay">
+  <div class="modal">
+    <h3 id="confirm-title">Confirmar</h3>
+    <p id="confirm-msg" style="color:var(--text2);margin-bottom:20px;font-size:15px;line-height:1.5"></p>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeModal('modal-confirm')">Não</button>
+      <button class="btn-primary" id="confirm-ok-btn">Sim</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EXCLUIR -->
+<div id="modal-excluir" class="modal-overlay">
+  <div class="modal">
+    <h3>🗑️ Excluir meta</h3>
+    <p style="color:var(--text2);margin-bottom:20px;font-size:15px;line-height:1.5">Tem certeza que deseja excluir esta meta? Todo o histórico será perdido.</p>
+    <div class="modal-btns">
+      <button class="btn-secondary" onclick="closeModal('modal-excluir')">Cancelar</button>
+      <button class="btn-primary" style="background:#E24B4A" id="excluir-ok-btn">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFETTI -->
+<div class="confetti-wrap" id="confetti-wrap">
+  <div class="confetti-msg" id="confetti-msg">
+    <span class="cf-emoji" id="confetti-emoji">⭐</span>
+    <span id="confetti-text">Meta cumprida!</span>
+  </div>
+</div>
+
+<script>
+// ── SUPABASE ──────────────────────────────────────────────
+const SUPABASE_URL = 'https://lwliemjzprhvyvcwsubc.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx3bGllbWp6cHJodnl2Y3dzdWJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk2MzI5MDAsImV4cCI6MjA5NTIwODkwMH0.oX2kv0MZOxiDNE9insIrJFQ2tdH_DzQ62hCUmcDp42o';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── CONSTANTES ────────────────────────────────────────────
+const EMOJIS = ['📚','🏃','🧹','🛏️','🍽️','🎨','🎵','🌱','💪','🧘','🚿','🐕','✏️','🎯','🧩','🍎'];
+const COLORS = ['#FF6B35','#7F77DD','#4CAF50','#2196F3','#FF9800','#E91E63','#00BCD4','#9C27B0','#FF5722','#607D8B'];
+
+// ── ESTADO LOCAL ──────────────────────────────────────────
+let metas = [];
+let config = { senha: '070809', tempo_tela: 60 };
+let registros = {};
+let bonusDias = {};
+let historico = [];
+let editandoMetaId = null;
+let selectedEmoji = EMOJIS[0];
+let selectedColor = COLORS[0];
+let excluirMetaId = null;
+let pinBuffer = '';
+
+// ── HELPERS DE DATA (fuso SP) ─────────────────────────────
+function getNow() {
+  return new Date(new Date().toLocaleString('en-US', { timeZone: 'America/Sao_Paulo' }));
+}
+function getDateKey(d) {
+  d = d || getNow();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function getWeekStart(ref) {
+  const now = ref || getNow();
+  const day = now.getDay();
+  const diff = (day === 0) ? -6 : 1 - day;
+  const mon = new Date(now);
+  mon.setDate(now.getDate() + diff);
+  mon.setHours(0,1,0,0);
+  return mon;
+}
+function getWeekEnd(ref) {
+  const ws = getWeekStart(ref);
+  const sun = new Date(ws);
+  sun.setDate(ws.getDate() + 6);
+  sun.setHours(20,0,0,0);
+  return sun;
+}
+function getWeekDays(ref) {
+  const ws = getWeekStart(ref);
+  return Array.from({length:7}, (_,i) => {
+    const d = new Date(ws);
+    d.setDate(ws.getDate() + i);
+    return getDateKey(d);
+  });
+}
+function formatMin(m) {
+  m = Math.round(m);
+  if (m < 60) return m + ' min';
+  const h = Math.floor(m/60), min = m%60;
+  return h + 'h ' + String(min).padStart(2,'0') + 'min';
+}
+function isWeekClosed() {
+  const now = getNow();
+  return now > getWeekEnd();
+}
+
+// ── SUPABASE: CARREGAR DADOS ──────────────────────────────
+async function loadAll() {
+  await loadConfig();
+  await loadMetas();
+  await loadRegistros();
+  await loadHistorico();
+}
+
+async function loadConfig() {
+  const { data } = await sb.from('nicole_config').select('*').limit(1).single();
+  if (data) config = data;
+}
+
+async function loadMetas() {
+  const { data } = await sb.from('nicole_metas').select('*').eq('ativa', true).order('criado_em', { ascending: true });
+  if (data) metas = data;
+}
+
+async function loadRegistros() {
+  const weekDays = getWeekDays();
+  const { data } = await sb.from('nicole_registros').select('*').gte('data', weekDays[0]).lte('data', weekDays[6]);
+  registros = {};
+  bonusDias = {};
+  if (data) {
+    data.forEach(r => {
+      if (!registros[r.data]) registros[r.data] = {};
+      registros[r.data][r.meta_id] = r.cumprida;
+    });
+    const bonusData = await sb.from('nicole_bonus').select('*').gte('data', weekDays[0]).lte('data', weekDays[6]);
+    if (bonusData.data) bonusData.data.forEach(b => { bonusDias[b.data] = b.conquistado; });
+  }
+}
+
+async function loadHistorico() {
+  const { data } = await sb.from('nicole_historico').select('*').order('semana_inicio', { ascending: false }).limit(10);
+  if (data) historico = data;
+}
+
+// ── NAVEGAÇÃO ─────────────────────────────────────────────
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+}
+function goHome() { showScreen('home'); }
+
+async function goNicole() {
+  showScreen('nicole');
+  await loadMetas();
+  await loadRegistros();
+  renderNicole();
+}
+
+async function goPainel() {
+  showScreen('painel');
+  await loadMetas();
+  await loadRegistros();
+  await loadHistorico();
+  renderPainel();
+}
+
+// ── PIN ───────────────────────────────────────────────────
+function openPinModal() {
+  pinBuffer = '';
+  updatePinDots();
+  document.getElementById('pin-error').style.display = 'none';
+  document.getElementById('modal-pin').classList.add('open');
+}
+function buildPinPad() {
+  const pad = document.getElementById('pin-pad');
+  pad.innerHTML = '';
+  for (let i = 1; i <= 9; i++) {
+    const b = document.createElement('button');
+    b.className = 'pin-key'; b.textContent = i;
+    b.onclick = () => pinPress(String(i));
+    pad.appendChild(b);
+  }
+  const del = document.createElement('button');
+  del.className = 'pin-key'; del.textContent = '⌫';
+  del.onclick = () => { pinBuffer = pinBuffer.slice(0,-1); updatePinDots(); };
+  pad.appendChild(del);
+  const zero = document.createElement('button');
+  zero.className = 'pin-key'; zero.textContent = '0';
+  zero.onclick = () => pinPress('0');
+  pad.appendChild(zero);
+  const ok = document.createElement('button');
+  ok.className = 'pin-key'; ok.textContent = '✓';
+  ok.style.cssText = 'background:var(--accent);color:white';
+  ok.onclick = checkPin;
+  pad.appendChild(ok);
+  const dots = document.getElementById('pin-dots');
+  dots.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const d = document.createElement('div'); d.className = 'pin-dot'; dots.appendChild(d);
+  }
+}
+function pinPress(ch) {
+  if (pinBuffer.length >= 6) return;
+  pinBuffer += ch; updatePinDots();
+}
+function updatePinDots() {
+  document.querySelectorAll('.pin-dot').forEach((d,i) => d.classList.toggle('filled', i < pinBuffer.length));
+}
+async function checkPin() {
+  await loadConfig();
+  if (pinBuffer === config.senha) {
+    document.getElementById('modal-pin').classList.remove('open');
+    document.getElementById('pin-error').style.display = 'none';
+    await loadMetas();
+    renderPaisMetas();
+    updateTempoLabel();
+    showScreen('pais');
+  } else {
+    document.getElementById('pin-error').style.display = 'block';
+    pinBuffer = ''; updatePinDots();
+  }
+}
+
+// ── MODALS ────────────────────────────────────────────────
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  if (id === 'modal-nova-meta') editandoMetaId = null;
+}
+
+// ── CONFIG: SENHA ─────────────────────────────────────────
+async function salvarSenha() {
+  const n = document.getElementById('nova-senha').value;
+  const c = document.getElementById('conf-senha').value;
+  const err = document.getElementById('senha-error');
+  const ok = document.getElementById('senha-success');
+  if (!n || n !== c) { err.style.display = 'block'; ok.style.display = 'none'; return; }
+  err.style.display = 'none';
+  await sb.from('nicole_config').update({ senha: n }).eq('id', config.id);
+  config.senha = n;
+  ok.style.display = 'block';
+  setTimeout(() => { ok.style.display = 'none'; closeModal('modal-senha'); }, 1500);
+}
+
+// ── CONFIG: TEMPO ─────────────────────────────────────────
+async function salvarTempo() {
+  const t = parseInt(document.getElementById('tempo-select').value);
+  await sb.from('nicole_config').update({ tempo_tela: t }).eq('id', config.id);
+  config.tempo_tela = t;
+  updateTempoLabel();
+  closeModal('modal-tempo');
+}
+function updateTempoLabel() {
+  document.getElementById('tempo-atual-label').textContent = formatMin(config.tempo_tela);
+  document.getElementById('tempo-select').value = config.tempo_tela;
+}
+
+// ── PICKERS ───────────────────────────────────────────────
+function renderEmojiPicker() {
+  const ep = document.getElementById('emoji-picker'); ep.innerHTML = '';
+  EMOJIS.forEach(e => {
+    const b = document.createElement('button');
+    b.className = 'ep-btn' + (e === selectedEmoji ? ' selected' : '');
+    b.textContent = e;
+    b.onclick = () => { selectedEmoji = e; renderEmojiPicker(); };
+    ep.appendChild(b);
+  });
+}
+function renderColorPicker() {
+  const cp = document.getElementById('color-picker'); cp.innerHTML = '';
+  COLORS.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'cp-btn' + (c === selectedColor ? ' selected' : '');
+    b.style.background = c;
+    b.onclick = () => { selectedColor = c; renderColorPicker(); };
+    cp.appendChild(b);
+  });
+}
+
+// ── METAS (PAIS) ──────────────────────────────────────────
+function abrirNovaMeta() {
+  editandoMetaId = null;
+  document.getElementById('modal-meta-title').textContent = '➕ Nova Meta';
+  document.getElementById('meta-nome').value = '';
+  selectedEmoji = EMOJIS[0]; selectedColor = COLORS[0];
+  renderEmojiPicker(); renderColorPicker();
+  document.getElementById('meta-error').style.display = 'none';
+  openModal('modal-nova-meta');
+}
+async function salvarMeta() {
+  const nome = document.getElementById('meta-nome').value.trim();
+  if (!nome) { document.getElementById('meta-error').style.display = 'block'; return; }
+  document.getElementById('meta-error').style.display = 'none';
+  if (editandoMetaId) {
+    await sb.from('nicole_metas').update({ nome, emoji: selectedEmoji, cor: selectedColor }).eq('id', editandoMetaId);
+    editandoMetaId = null;
+  } else {
+    await sb.from('nicole_metas').insert({ nome, emoji: selectedEmoji, cor: selectedColor, ativa: true });
+  }
+  await loadMetas();
+  renderPaisMetas();
+  closeModal('modal-nova-meta');
+}
+function editarMeta(id) {
+  const m = metas.find(x => x.id === id);
+  if (!m) return;
+  editandoMetaId = id;
+  document.getElementById('modal-meta-title').textContent = '✏️ Editar Meta';
+  document.getElementById('meta-nome').value = m.nome;
+  selectedEmoji = m.emoji; selectedColor = m.cor;
+  renderEmojiPicker(); renderColorPicker();
+  document.getElementById('meta-error').style.display = 'none';
+  openModal('modal-nova-meta');
+}
+function excluirMeta(id) {
+  excluirMetaId = id;
+  document.getElementById('excluir-ok-btn').onclick = async () => {
+    await sb.from('nicole_metas').update({ ativa: false }).eq('id', excluirMetaId);
+    await loadMetas();
+    renderPaisMetas();
+    closeModal('modal-excluir');
+  };
+  openModal('modal-excluir');
+}
+function renderPaisMetas() {
+  const el = document.getElementById('lista-metas-pais');
+  if (metas.length === 0) {
+    el.innerHTML = '<p style="color:var(--text2);font-size:14px;text-align:center;padding:20px">Nenhuma meta criada ainda.</p>';
+    return;
+  }
+  el.innerHTML = metas.map(m => `
+    <div class="meta-list-item">
+      <span class="mli-emoji">${m.emoji}</span>
+      <span class="mli-name" style="color:${m.cor}">${m.nome}</span>
+      <div style="display:flex;gap:8px">
+        <button class="mli-btn" onclick="editarMeta(${m.id})">✏️</button>
+        <button class="mli-btn" onclick="excluirMeta(${m.id})">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── NICOLE ────────────────────────────────────────────────
+function renderNicole() {
+  const todayKey = getDateKey();
+  const now = getNow();
+  const dateStr = now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+  document.getElementById('nicole-date').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+  const reg = registros[todayKey] || {};
+  const done = metas.filter(m => reg[m.id]).length;
+  document.getElementById('progress-bar').style.width = metas.length ? (done/metas.length*100)+'%' : '0%';
+  document.getElementById('progress-label').textContent = done + ' de ' + metas.length + ' metas concluídas';
+  const container = document.getElementById('nicole-metas');
+  if (metas.length === 0) {
+    container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text2)"><div style="font-size:48px">🎯</div><p style="margin-top:12px;font-size:15px">Nenhuma meta criada ainda.<br>Peça para Papai ou Mamãe criar!</p></div>';
+    return;
+  }
+  const valUnit = config.tempo_tela / metas.length;
+  container.innerHTML = metas.map(m => {
+    const isDone = !!(reg[m.id]);
+    return `<div class="meta-card ${isDone?'done':''}" onclick="toggleMeta(${m.id})" style="border-left:5px solid ${m.cor}">
+      <div class="meta-emoji-big">${m.emoji}</div>
+      <div class="meta-info">
+        <div class="meta-name">${m.nome}</div>
+        <div class="meta-status">${isDone ? '✅ Concluída!' : '⏳ Aguardando... +' + formatMin(valUnit)}</div>
+      </div>
+      <div class="meta-check">${isDone ? '✅' : '⭕'}</div>
+    </div>`;
+  }).join('');
+}
+
+async function toggleMeta(id) {
+  const todayKey = getDateKey();
+  const reg = registros[todayKey] || {};
+  const meta = metas.find(m => m.id === id);
+  if (!meta) return;
+  if (reg[id]) {
+    confirm2('Reabrir meta', 'Deseja reabrir essa meta?', async () => {
+      await sb.from('nicole_registros').upsert({ meta_id: id, data: todayKey, cumprida: false }, { onConflict: 'meta_id,data' });
+      await checkBonus(todayKey);
+      await loadRegistros();
+      renderNicole();
+    });
+  } else {
+    confirm2('Concluir meta', 'Tem certeza que concluiu essa meta?', async () => {
+      await sb.from('nicole_registros').upsert({ meta_id: id, data: todayKey, cumprida: true }, { onConflict: 'meta_id,data' });
+      await loadRegistros();
+      const allDone = metas.every(m => (registros[todayKey]||{})[m.id]);
+      await checkBonus(todayKey);
+      const valUnit = config.tempo_tela / metas.length;
+      showConfetti(meta.emoji, '+' + formatMin(valUnit) + ' conquistados!', allDone);
+      renderNicole();
+    });
+  }
+}
+
+async function checkBonus(dk) {
+  const reg = registros[dk] || {};
+  const allDone = metas.length > 0 && metas.every(m => reg[m.id]);
+  await sb.from('nicole_bonus').upsert({ data: dk, conquistado: allDone }, { onConflict: 'data' });
+  bonusDias[dk] = allDone;
+}
+
+// ── PAINEL ────────────────────────────────────────────────
+function calcPainel() {
+  const weekDays = getWeekDays();
+  const todayKey = getDateKey();
+  const dayIdx = weekDays.indexOf(todayKey);
+  if (dayIdx < 0) return { metasMin:0, bonusMin:0, totalMin:0, bonusDiasList:[] };
+  let totalMetas = 0;
+  for (let d = 0; d <= dayIdx; d++) {
+    const dk = weekDays[d];
+    const metasDia = metas.filter(m => {
+      const mc = (m.criado_em||'').slice(0,10);
+      return !mc || mc <= dk;
+    });
+    const n = metasDia.length;
+    if (!n) continue;
+    const valUnit = config.tempo_tela / n;
+    metasDia.forEach(m => { if ((registros[dk]||{})[m.id]) totalMetas += valUnit; });
+  }
+  let bonusDiasList = [], bonusMin = 0;
+  weekDays.slice(0, dayIdx+1).forEach(dk => {
+    if (bonusDias[dk]) { bonusDiasList.push(dk); bonusMin += 3; }
+  });
+  bonusMin = Math.min(bonusMin, 21);
+  const maxTotal = config.tempo_tela * 7 + 21;
+  const totalMin = Math.min(Math.round(totalMetas) + bonusMin, maxTotal);
+  return { metasMin: Math.round(totalMetas), bonusMin, totalMin, bonusDiasList };
+}
+
+function renderPainel() {
+  const { metasMin, bonusMin, totalMin, bonusDiasList } = calcPainel();
+  document.getElementById('painel-total').textContent = formatMin(totalMin);
+  document.getElementById('painel-metas-time').textContent = formatMin(metasMin);
+  document.getElementById('painel-bonus-time').textContent = bonusMin + ' min';
+  document.getElementById('trophy-row').innerHTML = bonusDiasList.map(() => '<span class="trophy-icon">🏆</span>').join('');
+  const we = getWeekEnd(), now = getNow(), diff = we - now;
+  if (diff > 0) {
+    const days = Math.floor(diff/86400000), hours = Math.floor((diff%86400000)/3600000), mins = Math.floor((diff%3600000)/60000);
+    document.getElementById('painel-countdown').textContent = days > 0 ? `⏳ Fecha em ${days}d ${hours}h` : `⏳ Fecha em ${hours}h ${mins}min`;
+  } else {
+    document.getElementById('painel-countdown').textContent = '✅ Semana encerrada!';
+  }
+  const weekDays = getWeekDays(), todayKey = getDateKey();
+  document.getElementById('tabela-body').innerHTML = metas.length === 0
+    ? '<tr><td colspan="8" style="text-align:center;color:var(--text2);padding:20px">Nenhuma meta cadastrada.</td></tr>'
+    : metas.map(m => {
+        const cells = weekDays.map(dk => {
+          const mc = (m.criado_em||'').slice(0,10);
+          if (mc && dk < mc) return '<td style="color:var(--text2)">-</td>';
+          if (dk > todayKey) return '<td style="color:var(--text2)">·</td>';
+          if ((registros[dk]||{})[m.id]) return '<td>⏱️</td>';
+          if (dk === todayKey) return '<td>⚠️</td>';
+          return '<td>⛔</td>';
+        }).join('');
+        return `<tr><td class="meta-col">${m.emoji} ${m.nome}</td>${cells}</tr>`;
+      }).join('');
+  renderHistorico();
+}
+
+function renderHistorico() {
+  const el = document.getElementById('historico-content');
+  if (!historico || historico.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text2)"><div style="font-size:48px">📅</div><p style="margin-top:12px;font-size:15px">Nenhuma semana finalizada ainda.</p></div>';
+    return;
+  }
+  el.innerHTML = historico.map(s => `
+    <div class="hist-semana">
+      <h4>${s.label || s.semana_inicio}</h4>
+      <div class="hist-total">${formatMin(s.total_min)} conquistados</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:10px">⭐ Metas: ${formatMin(s.metas_min)} | 🏆 Bônus: ${s.bonus_min} min | ${'🏆'.repeat(s.trofeus||0)}</div>
+    </div>`).join('');
+}
+
+function showTab(tab) {
+  document.getElementById('tab-semana').style.display = tab === 'semana' ? 'block' : 'none';
+  document.getElementById('tab-historico').style.display = tab === 'historico' ? 'block' : 'none';
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', (i===0)===(tab==='semana')));
+}
+
+// ── CONFIRM / CONFETTI ────────────────────────────────────
+function confirm2(title, msg, cb) {
+  document.getElementById('confirm-title').textContent = title;
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-ok-btn').onclick = () => { closeModal('modal-confirm'); cb(); };
+  openModal('modal-confirm');
+}
+function showConfetti(emoji, msg, isBonus) {
+  const wrap = document.getElementById('confetti-wrap');
+  document.getElementById('confetti-emoji').textContent = isBonus ? '🏆' : emoji;
+  document.getElementById('confetti-text').textContent = isBonus ? '🎉 Bônus conquistado! +3 min extras!' : msg;
+  wrap.classList.add('show');
+  const colors = ['#FF6B35','#FFB347','#7F77DD','#4CAF50','#2196F3','#FF9800'];
+  for (let i = 0; i < 35; i++) {
+    const p = document.createElement('div');
+    p.className = 'confetti-particle';
+    p.style.cssText = `left:${Math.random()*100}%;top:-10px;background:${colors[i%colors.length]};transform:rotate(${Math.random()*360}deg);animation-delay:${Math.random()*0.6}s;animation-duration:${1.2+Math.random()}s`;
+    wrap.appendChild(p);
+  }
+  setTimeout(() => { wrap.classList.remove('show'); wrap.querySelectorAll('.confetti-particle').forEach(p => p.remove()); }, 2800);
+}
+
+// ── INIT ──────────────────────────────────────────────────
+buildPinPad();
+renderEmojiPicker();
+renderColorPicker();
+loadAll();
+</script>
+</body>
+</html>
