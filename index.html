@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Metas da Nicole ⭐</title>
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fredoka+One&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -22,7 +22,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 /* HOME */
 .home-header { text-align: center; padding: 40px 0 28px; }
 .home-emoji { font-size: 72px; display: block; margin-bottom: 8px; }
-.home-title { font-size: 30px; font-weight: 800; color: var(--accent); letter-spacing: -0.5px; }
+.home-title { font-size: 42px; font-weight: 900; color: var(--accent); letter-spacing: -1px; font-family: 'Fredoka One', 'Nunito', sans-serif; line-height: 1.1; }
 .home-sub { font-size: 14px; color: var(--text2); margin-top: 6px; }
 .home-btns { display: flex; flex-direction: column; gap: 14px; margin-top: 20px; }
 .home-btn { border: none; border-radius: var(--radius); padding: 20px 24px; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: transform 0.15s; font-family: 'Nunito', sans-serif; }
@@ -227,6 +227,14 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <button class="tab-btn" onclick="showTab('historico')">Histórico</button>
   </div>
   <div id="tab-semana">
+    <div style="background:linear-gradient(135deg,#FFB347,#FF6B35);border-radius:16px;padding:16px 20px;margin-bottom:14px;display:flex;align-items:center;gap:14px;color:white">
+      <span style="font-size:40px">🏆</span>
+      <div>
+        <div style="font-size:13px;opacity:0.85;font-weight:600">Dias Perfeitos</div>
+        <div style="font-size:36px;font-weight:900;line-height:1" id="dias-perfeitos-total">0</div>
+        <div style="font-size:12px;opacity:0.8;margin-top:2px">dias com todas as metas cumpridas</div>
+      </div>
+    </div>
     <div class="painel-hero">
       <div style="font-size:36px;margin-bottom:6px">⏱️</div>
       <div class="total-time" id="painel-total">0h 00min</div>
@@ -267,6 +275,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <div class="pin-dots" id="pin-dots"></div>
     <div id="pin-error" class="error-msg">Senha incorreta. Tente novamente.</div>
     <div class="pin-pad" id="pin-pad"></div>
+    <button class="btn-secondary" style="width:100%;margin-top:14px" onclick="closeModal('modal-pin');pinBuffer='';updatePinDots();">← Cancelar</button>
   </div>
 </div>
 
@@ -743,12 +752,18 @@ function calcPainel() {
   return { metasMin: Math.round(totalMetas), bonusMin, totalMin, bonusDiasList };
 }
 
+async function loadDiasPerfeitos() {
+  const { count } = await sb.from('nicole_bonus').select('*', { count: 'exact', head: true }).eq('conquistado', true);
+  document.getElementById('dias-perfeitos-total').textContent = count || 0;
+}
+
 function renderPainel() {
   const { metasMin, bonusMin, totalMin, bonusDiasList } = calcPainel();
   document.getElementById('painel-total').textContent = formatMin(totalMin);
   document.getElementById('painel-metas-time').textContent = formatMin(metasMin);
   document.getElementById('painel-bonus-time').textContent = bonusMin + ' min';
   document.getElementById('trophy-row').innerHTML = bonusDiasList.map(() => '<span class="trophy-icon">🏆</span>').join('');
+  loadDiasPerfeitos();
   const we = getWeekEnd(), now = getNow(), diff = we - now;
   if (diff > 0) {
     const days = Math.floor(diff/86400000), hours = Math.floor((diff%86400000)/3600000), mins = Math.floor((diff%3600000)/60000);
