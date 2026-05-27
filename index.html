@@ -20,9 +20,9 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 .screen.active { display: block; }
 
 /* HOME */
-.home-header { text-align: center; padding: 40px 0 28px; }
-.home-emoji { font-size: 72px; display: block; margin-bottom: 8px; }
-.home-title { font-size: 42px; font-weight: 900; color: var(--accent); letter-spacing: -1px; font-family: 'Fredoka One', 'Nunito', sans-serif; line-height: 1.1; }
+.home-header { text-align: center; padding: 32px 0 20px; }
+.home-emoji { font-size: 64px; display: block; margin-bottom: 10px; }
+.home-title { font-family: 'Fredoka One', 'Nunito', sans-serif; font-weight: 900; color: var(--accent); letter-spacing: -1px; line-height: 1.05; display: block; width: 100%; font-size: clamp(32px, 10vw, 52px); }
 .home-sub { font-size: 14px; color: var(--text2); margin-top: 6px; }
 .home-btns { display: flex; flex-direction: column; gap: 14px; margin-top: 20px; }
 .home-btn { border: none; border-radius: var(--radius); padding: 20px 24px; font-size: 18px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: transform 0.15s; font-family: 'Nunito', sans-serif; }
@@ -149,7 +149,6 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 @media (max-width: 400px) {
   .painel-hero .total-time { font-size: 40px; }
   .tabela { font-size: 11px; }
-  .home-title { font-size: 24px; }
 }
 </style>
 </head>
@@ -167,14 +166,17 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
       <span class="btn-icon">🌟</span>
       <div class="btn-text">Nicole<small>Ver e cumprir minhas metas</small></div>
     </button>
-    <button class="home-btn pais" onclick="openPinModal()">
-      <span class="btn-icon">🔒</span>
-      <div class="btn-text">Papai & Mamãe<small>Configurações e metas</small></div>
-    </button>
     <button class="home-btn painel" onclick="goPainel()">
       <span class="btn-icon">📊</span>
       <div class="btn-text">Painel<small>Ver progresso semanal</small></div>
     </button>
+    <button class="home-btn pais" onclick="openPinModal()">
+      <span class="btn-icon">🔒</span>
+      <div class="btn-text">Papai & Mamãe<small>Configurações e metas</small></div>
+    </button>
+  </div>
+  <div style="text-align:center;margin-top:24px;padding-bottom:12px">
+    <span style="font-size:10px;color:var(--text2);opacity:0.6">V. 1.0.1</span>
   </div>
 </div>
 
@@ -227,18 +229,24 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <button class="tab-btn" onclick="showTab('historico')">Histórico</button>
   </div>
   <div id="tab-semana">
-    <div style="background:linear-gradient(135deg,#FFB347,#FF6B35);border-radius:16px;padding:16px 20px;margin-bottom:14px;display:flex;align-items:center;gap:14px;color:white">
-      <span style="font-size:40px">🏆</span>
-      <div>
-        <div style="font-size:13px;opacity:0.85;font-weight:600">Dias Perfeitos</div>
-        <div style="font-size:36px;font-weight:900;line-height:1" id="dias-perfeitos-total">0</div>
-        <div style="font-size:12px;opacity:0.8;margin-top:2px">dias com todas as metas cumpridas</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px">
+      <div style="background:linear-gradient(135deg,#FFB347,#FF6B35);border-radius:16px;padding:16px;color:white;text-align:center">
+        <div style="font-size:28px;margin-bottom:4px">🏆</div>
+        <div style="font-size:11px;opacity:0.85;font-weight:600;margin-bottom:2px">Total de Dias Perfeitos</div>
+        <div style="font-size:38px;font-weight:900;line-height:1" id="dias-perfeitos-total">0</div>
+        <div style="font-size:10px;opacity:0.75;margin-top:2px">dias com todas as metas</div>
+      </div>
+      <div style="background:linear-gradient(135deg,#FF5722,#FF8C00);border-radius:16px;padding:16px;color:white;text-align:center">
+        <div style="font-size:28px;margin-bottom:4px">🔥</div>
+        <div style="font-size:11px;opacity:0.85;font-weight:600;margin-bottom:2px">Ofensiva Atual</div>
+        <div style="font-size:38px;font-weight:900;line-height:1" id="dias-ofensiva">0</div>
+        <div style="font-size:10px;opacity:0.75;margin-top:2px">dias seguidos perfeitos</div>
       </div>
     </div>
     <div class="painel-hero">
       <div style="font-size:36px;margin-bottom:6px">⏱️</div>
       <div class="total-time" id="painel-total">0h 00min</div>
-      <div class="total-label">Tempo total conquistado para a próxima semana</div>
+      <div class="total-label">Tempo conquistado para a próxima semana</div>
       <div class="countdown" id="painel-countdown">⏳ calculando...</div>
     </div>
     <div class="time-breakdown">
@@ -753,8 +761,21 @@ function calcPainel() {
 }
 
 async function loadDiasPerfeitos() {
+  // Total de dias perfeitos
   const { count } = await sb.from('nicole_bonus').select('*', { count: 'exact', head: true }).eq('conquistado', true);
   document.getElementById('dias-perfeitos-total').textContent = count || 0;
+
+  // Ofensiva: dias perfeitos consecutivos até hoje
+  const todayKey = getDateKey();
+  const { data: bonusData } = await sb.from('nicole_bonus').select('data, conquistado').lte('data', todayKey).order('data', { ascending: false });
+  let ofensiva = 0;
+  if (bonusData) {
+    for (const b of bonusData) {
+      if (b.conquistado) { ofensiva++; }
+      else { break; }
+    }
+  }
+  document.getElementById('dias-ofensiva').textContent = ofensiva;
 }
 
 function renderPainel() {
@@ -779,8 +800,8 @@ function renderPainel() {
           const mc = (m.criado_em||'').slice(0,10);
           if (mc && dk < mc) return '<td style="color:var(--text2)">-</td>';
           if (dk > todayKey) return '<td style="color:var(--text2)">·</td>';
-          if ((registros[dk]||{})[m.id]) return '<td>⏱️</td>';
-          if (dk === todayKey) return '<td>⚠️</td>';
+          if ((registros[dk]||{})[m.id]) return '<td>⭐</td>';
+          if (dk === todayKey) return '<td>⏱️</td>';
           return '<td>⛔</td>';
         }).join('');
         return `<tr><td class="meta-col">${m.emoji} ${m.nome}</td>${cells}</tr>`;
