@@ -165,14 +165,14 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 </head>
 <body>
 
-<!-- BARRA CONQUISTAS TOPO (visível em todas as telas exceto home) -->
-<div id="top-stats-bar" style="display:none">
+<!-- BARRA CONQUISTAS TOPO (visível em todas as telas) -->
+<div id="top-stats-bar">
   <div class="top-stats">
-    <div class="top-stat"><span class="ts-icon">⏱️</span><span class="ts-val" id="ts-tempo">0min</span></div>
+    <div class="top-stat"><span class="ts-icon">⏱️</span><span class="ts-val" id="ts-tempo">—</span></div>
     <div class="top-stat-sep"></div>
-    <div class="top-stat"><span class="ts-icon">🏆</span><span class="ts-val" id="ts-trofeus">0</span></div>
+    <div class="top-stat"><span class="ts-icon">🏆</span><span class="ts-val" id="ts-trofeus">—</span></div>
     <div class="top-stat-sep"></div>
-    <div class="top-stat"><span class="ts-icon">🔥</span><span class="ts-val" id="ts-ofensiva">0</span></div>
+    <div class="top-stat"><span class="ts-icon">🔥</span><span class="ts-val" id="ts-ofensiva">—</span></div>
   </div>
 </div>
 
@@ -189,7 +189,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
       <div class="btn-text">Nicole<small>Ver e cumprir minhas metas</small></div>
     </button>
     <button class="home-btn painel" onclick="goPainel()">
-      <span class="btn-icon">📊</span>
+      <span class="btn-icon">📲</span>
       <div class="btn-text">Painel<small>Ver progresso semanal</small></div>
     </button>
     <button class="home-btn pais" onclick="openPinModal()">
@@ -198,7 +198,7 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     </button>
   </div>
   <div style="text-align:center;margin-top:24px;padding-bottom:12px">
-    <span style="font-size:10px;color:var(--text2);opacity:0.6">V. 1.1</span>
+    <span style="font-size:10px;color:var(--text2);opacity:0.6">V. 1.2</span>
   </div>
 </div>
 
@@ -497,8 +497,7 @@ async function loadHistorico() {
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
-  document.getElementById('top-stats-bar').style.display = (name === 'home') ? 'none' : 'block';
-  if (name !== 'home') updateTopStats();
+  updateTopStats();
 }
 
 async function updateTopStats() {
@@ -722,14 +721,13 @@ function renderNicole() {
     container.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--text2)"><div style="font-size:48px">🎯</div><p style="margin-top:12px;font-size:15px">Nenhuma meta criada ainda.<br>Peça para Papai ou Mamãe criar!</p></div>';
     return;
   }
-  const valUnit = config.tempo_tela / metas.length;
   container.innerHTML = metas.map(m => {
     const isDone = !!(reg[m.id]);
     return `<div class="meta-card ${isDone?'done':''}" onclick="toggleMeta(${m.id})" style="border-left:5px solid ${m.cor}">
       <div class="meta-emoji-big">${m.emoji}</div>
       <div class="meta-info">
         <div class="meta-name">${m.nome}</div>
-        <div class="meta-status">${isDone ? '✅ Concluída!' : '⏳ Aguardando... +' + formatMin(valUnit)}</div>
+        <div class="meta-status">${isDone ? '✅ Concluída!' : '⏳ Aguardando...'}</div>
       </div>
       <div class="meta-check">${isDone ? '✅' : '⭕'}</div>
     </div>`;
@@ -754,8 +752,7 @@ async function toggleMeta(id) {
       await loadRegistros();
       const allDone = metas.every(m => (registros[todayKey]||{})[m.id]);
       await checkBonus(todayKey);
-      const valUnit = config.tempo_tela / metas.length;
-      showConfetti(meta.emoji, '+' + formatMin(valUnit) + ' conquistados!', allDone);
+      showConfetti(meta.emoji, 'Recompensa Conquistada! 🎉', allDone);
       renderNicole();
     });
   }
@@ -774,26 +771,45 @@ function calcPainel() {
   const todayKey = getDateKey();
   const dayIdx = weekDays.indexOf(todayKey);
   if (dayIdx < 0) return { metasMin:0, bonusMin:0, totalMin:0, bonusDiasList:[] };
-  let totalMetas = 0;
+
+  // Total de conclusões possíveis na semana inteira (considerando data de criação de cada meta)
+  let totalPossivelSemana = 0;
+  for (let d = 0; d < 7; d++) {
+    const dk = weekDays[d];
+    const metasDia = metas.filter(m => {
+      const mc = (m.criado_em||'').slice(0,10);
+      return !mc || mc <= dk;
+    });
+    totalPossivelSemana += metasDia.length;
+  }
+
+  if (totalPossivelSemana === 0) return { metasMin:0, bonusMin:0, totalMin:0, bonusDiasList:[] };
+
+  // Valor por conclusão: tempo máximo definido ÷ total de conclusões possíveis na semana
+  // O teto é exatamente o tempo definido em Papai & Mamãe (tempo_tela)
+  const weeklyMax = config.tempo_tela;
+  const valUnit = weeklyMax / totalPossivelSemana;
+
+  // Conta conclusões reais até hoje
+  let conclusoes = 0;
   for (let d = 0; d <= dayIdx; d++) {
     const dk = weekDays[d];
     const metasDia = metas.filter(m => {
       const mc = (m.criado_em||'').slice(0,10);
       return !mc || mc <= dk;
     });
-    const n = metasDia.length;
-    if (!n) continue;
-    const valUnit = config.tempo_tela / n;
-    metasDia.forEach(m => { if ((registros[dk]||{})[m.id]) totalMetas += valUnit; });
+    metasDia.forEach(m => { if ((registros[dk]||{})[m.id]) conclusoes++; });
   }
+
+  const metasMin = Math.min(Math.round(conclusoes * valUnit), weeklyMax);
+
   let bonusDiasList = [], bonusMin = 0;
   weekDays.slice(0, dayIdx+1).forEach(dk => {
     if (bonusDias[dk]) { bonusDiasList.push(dk); bonusMin += 3; }
   });
   bonusMin = Math.min(bonusMin, 21);
-  const maxTotal = config.tempo_tela * 7 + 21;
-  const totalMin = Math.min(Math.round(totalMetas) + bonusMin, maxTotal);
-  return { metasMin: Math.round(totalMetas), bonusMin, totalMin, bonusDiasList };
+  const totalMin = Math.min(metasMin + bonusMin, weeklyMax + 21);
+  return { metasMin, bonusMin, totalMin, bonusDiasList };
 }
 
 async function loadDiasPerfeitos() {
@@ -891,7 +907,7 @@ function showConfetti(emoji, msg, isBonus) {
 buildPinPad();
 renderEmojiPicker();
 renderColorPicker();
-loadAll();
+loadAll().then(() => updateTopStats());
 </script>
 </body>
 </html>
