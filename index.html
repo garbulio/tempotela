@@ -18,6 +18,7 @@
 body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 .screen { display: none; padding: 16px; max-width: 480px; margin: 0 auto; min-height: 100vh; }
 .screen.active { display: block; }
+.screen:not(#screen-home) { padding-top: 8px; }
 
 /* HOME */
 .home-header { text-align: center; padding: 32px 0 20px; }
@@ -141,7 +142,17 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 .hist-semana h4 { font-size: 14px; font-weight: 700; margin-bottom: 4px; color: var(--accent); }
 .hist-semana .hist-total { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
 
-/* LOADING */
+/* BARRA CONQUISTAS TOPO */
+.top-stats { position: sticky; top: 0; z-index: 50; background: var(--card); border-bottom: 1px solid var(--border); display: flex; justify-content: center; align-items: center; gap: 20px; padding: 10px 16px; max-width: 480px; margin: 0 auto; }
+.top-stat { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 800; color: var(--text); }
+.top-stat span.ts-icon { font-size: 20px; }
+.top-stat span.ts-val { font-size: 16px; font-weight: 900; }
+.top-stat-sep { width: 1px; height: 24px; background: var(--border); }
+
+/* BOTÃO HOME RODAPÉ */
+.home-footer-btn { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: var(--accent); color: white; border: none; padding: 18px; font-size: 20px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; display: flex; align-items: center; justify-content: center; gap: 10px; z-index: 49; box-shadow: 0 -2px 12px rgba(255,107,53,0.2); }
+.home-footer-btn:active { background: #e85a25; }
+.screen-inner { padding-bottom: 80px; }
 .loading { text-align: center; padding: 40px 20px; color: var(--text2); font-size: 15px; }
 .spinner { font-size: 36px; display: block; margin-bottom: 12px; animation: spin 1s linear infinite; }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
@@ -153,6 +164,17 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
 </style>
 </head>
 <body>
+
+<!-- BARRA CONQUISTAS TOPO (visível em todas as telas exceto home) -->
+<div id="top-stats-bar" style="display:none">
+  <div class="top-stats">
+    <div class="top-stat"><span class="ts-icon">⏱️</span><span class="ts-val" id="ts-tempo">0min</span></div>
+    <div class="top-stat-sep"></div>
+    <div class="top-stat"><span class="ts-icon">🏆</span><span class="ts-val" id="ts-trofeus">0</span></div>
+    <div class="top-stat-sep"></div>
+    <div class="top-stat"><span class="ts-icon">🔥</span><span class="ts-val" id="ts-ofensiva">0</span></div>
+  </div>
+</div>
 
 <!-- HOME -->
 <div id="screen-home" class="screen active">
@@ -176,16 +198,13 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     </button>
   </div>
   <div style="text-align:center;margin-top:24px;padding-bottom:12px">
-    <span style="font-size:10px;color:var(--text2);opacity:0.6">V. 1.0.2</span>
+    <span style="font-size:10px;color:var(--text2);opacity:0.6">V. 1.1</span>
   </div>
 </div>
 
 <!-- NICOLE -->
 <div id="screen-nicole" class="screen">
-  <div class="top-bar">
-    <button class="back-btn" onclick="goHome()">← Voltar</button>
-    <h2>🌟 Nicole</h2>
-  </div>
+  <div class="screen-inner">
   <div class="nicole-header">
     <div class="nicole-greeting">Olá, Nicole! 👋</div>
     <div class="nicole-date" id="nicole-date"></div>
@@ -193,14 +212,13 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <div class="progress-label" id="progress-label">0 de 0 metas</div>
   </div>
   <div id="nicole-metas"><div class="loading"><span class="spinner">⏳</span>Carregando metas...</div></div>
+  </div>
+  <button class="home-footer-btn" onclick="goHome()"><span>🏠</span> Início</button>
 </div>
 
 <!-- PAIS -->
 <div id="screen-pais" class="screen">
-  <div class="top-bar">
-    <button class="back-btn" onclick="goHome()">← Voltar</button>
-    <h2>🔒 Papai & Mamãe</h2>
-  </div>
+  <div class="screen-inner">
   <div class="section-title">Configurações</div>
   <div class="setting-row" onclick="openModal('modal-senha')">
     <div class="sr-left"><span class="sr-icon">🔑</span> Alterar Senha</div>
@@ -216,14 +234,13 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
     <span class="sr-arrow">›</span>
   </div>
   <div id="lista-metas-pais"><div class="loading"><span class="spinner">⏳</span>Carregando...</div></div>
+  </div>
+  <button class="home-footer-btn" onclick="goHome()"><span>🏠</span> Início</button>
 </div>
 
 <!-- PAINEL -->
 <div id="screen-painel" class="screen">
-  <div class="top-bar">
-    <button class="back-btn" onclick="goHome()">← Voltar</button>
-    <h2>📊 Painel</h2>
-  </div>
+  <div class="screen-inner">
   <div class="tab-btns">
     <button class="tab-btn active" onclick="showTab('semana')">Esta semana</button>
     <button class="tab-btn" onclick="showTab('historico')">Histórico</button>
@@ -273,7 +290,9 @@ body { font-family: 'Nunito', sans-serif; background: var(--bg); color: var(--te
   </div>
   <div id="tab-historico" style="display:none">
     <div id="historico-content"><div class="loading"><span class="spinner">⏳</span>Carregando histórico...</div></div>
-  </div>
+  </div><!-- fim tab-historico -->
+  </div><!-- fim screen-inner -->
+  <button class="home-footer-btn" onclick="goHome()"><span>🏠</span> Início</button>
 </div>
 
 <!-- MODAL PIN -->
@@ -378,7 +397,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 // ── CONSTANTES ────────────────────────────────────────────
-const EMOJIS = ['📚','🏃','🧹','🛏️','🍽️','🎨','🎵','🌱','💪','🧘','🚿','🐕','✏️','🎯','🧩','🍎','🐟','👗','🐱'];
+const EMOJIS = ['📚','🏃','🧹','🛏️','🍽️','🎨','🎵','🌱','💪','🧘','🚿','🐕','✏️','🎯','🧩','🍎','🐟','👗','🐱','🪣'];
 const COLORS = ['#FF6B35','#7F77DD','#4CAF50','#2196F3','#FF9800','#E91E63','#00BCD4','#9C27B0','#FF5722','#607D8B'];
 
 // ── ESTADO LOCAL ──────────────────────────────────────────
@@ -478,6 +497,23 @@ async function loadHistorico() {
 function showScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
+  document.getElementById('top-stats-bar').style.display = (name === 'home') ? 'none' : 'block';
+  if (name !== 'home') updateTopStats();
+}
+
+async function updateTopStats() {
+  // Tempo total conquistas
+  const { metasMin, bonusMin, totalMin } = calcPainel();
+  document.getElementById('ts-tempo').textContent = formatMin(totalMin);
+  // Total dias perfeitos
+  const { count } = await sb.from('nicole_bonus').select('*', { count: 'exact', head: true }).eq('conquistado', true);
+  document.getElementById('ts-trofeus').textContent = count || 0;
+  // Ofensiva
+  const todayKey = getDateKey();
+  const { data: bonusData } = await sb.from('nicole_bonus').select('data, conquistado').lte('data', todayKey).order('data', { ascending: false });
+  let ofensiva = 0;
+  if (bonusData) { for (const b of bonusData) { if (b.conquistado) ofensiva++; else break; } }
+  document.getElementById('ts-ofensiva').textContent = ofensiva;
 }
 function goHome() { showScreen('home'); }
 
@@ -802,7 +838,7 @@ function renderPainel() {
           if (dk > todayKey) return '<td style="color:var(--text2)">·</td>';
           if ((registros[dk]||{})[m.id]) return '<td>⭐</td>';
           if (dk === todayKey) return '<td>⏱️</td>';
-          return '<td>⛔</td>';
+          return '<td>❌</td>';
         }).join('');
         return `<tr><td class="meta-col">${m.emoji} ${m.nome}</td>${cells}</tr>`;
       }).join('');
